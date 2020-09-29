@@ -29,5 +29,6 @@ Notes :
 - While I cannot help every single person right away if you need help setting the bot up, I will try my best to reply to all of them eventually!
 - DM me any feature suggestions or project ideas!
 
-Current Plans :
+Update Plans :
 - Add proxy support so big servers will be able to use this without getting ip banned/ ratelimited
+- Refactor code
