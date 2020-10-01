@@ -104,7 +104,10 @@ async def on_message(message):
                     embed.add_field(name='Retail Price', value=f"${int(trait['value'])}")
                 except:
                     pass
-        embed.add_field(name='Release Date', value=general['releaseDate'], inline=True)
+        if 'releaseDate' in general:
+            embed.add_field(name='Release Date', value=general['releaseDate'], inline=True)
+        else:
+            embed.add_field(name='Release Date', value='None', inline=True)
         embed.add_field(name='Highest Bid', value=f"${market['highestBid']} Size {market['highestBidSize']}", inline=True)
         embed.add_field(name='Lowest Ask', value=f"${market['lowestAsk']} Size {market['lowestAskSize']}", inline=True)
         embed.add_field(name='Total Asks', value=market['numberOfAsks'], inline=True)
