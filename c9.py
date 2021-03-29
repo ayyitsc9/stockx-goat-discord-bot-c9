@@ -217,7 +217,7 @@ async def on_message(message):
                     pass
                 json_string = json.dumps({"params": f"query={keywords}&hitsPerPage=20&facets=*"})
                 byte_payload = bytes(json_string, 'utf-8')
-                algolia = {"x-algolia-agent": "Algolia for vanilla JavaScript 3.32.0", "x-algolia-application-id": "XW7SBCT9V6", "x-algolia-api-key": "6bfb5abee4dcd8cea8f0ca1ca085c2b3"}
+                algolia = {"x-algolia-agent": "Algolia for vanilla JavaScript 3.32.0", "x-algolia-application-id": "XW7SBCT9V6", "x-algolia-api-key": "6b5e76b49705eb9f51a06d3c82f7acee"}
                 with requests.Session() as session:
                     r = session.post("https://xw7sbct9v6-dsn.algolia.net/1/indexes/products/query", params=algolia, data=byte_payload, timeout=30)
                 try:
