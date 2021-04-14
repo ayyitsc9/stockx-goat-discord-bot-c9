@@ -12,17 +12,10 @@ from datetime import datetime
 urllib3.disable_warnings()
 
 # Miscallaneous Variables
-client = discord.Client()
-with open("settings.json") as settings_file:
-    settings = json.load(settings_file)
-print(settings)
-bot_token = settings["bot_token"]
-server = settings["server_id"]
-command_prefix = settings["command_prefix"]
-thumbnail_icon_url = settings["thumbnail_icon_url"]
-footer_text = settings["footer_text"]
-footer_icon_url = settings["footer_icon_url"]
-embed_color = 0x13e79e # Feel free to change this to a different color code!
+intents = discord.Intents.all()
+client = discord.Client(intents=intents)
+bot_token = "NDg0NDkxNjU2NTk1Mzc0MDky.W4cgBA.6IbPQBT8eHfjxdvHD8Mtmhv8u5M"
+server = 482713929101869057
 guild = None
 marketplace_fee_rates = {
     "stockx": {
@@ -51,29 +44,26 @@ async def on_ready():
 @client.event
 async def on_message(message):
     # StockX search command
-    if message.content.startswith(f"{command_prefix}stockx"):
+    if message.content.startswith(".stockx"):
         args = message.content.split("stockx ")[1]
         words = re.findall(r'\w+', args)
         keywords = ''
         for word in words:
             keywords += word + '%20'
-        json_string = json.dumps({"params": f"query={keywords}&hitsPerPage=10&facets=*"})
+        json_string = json.dumps({"params": f"query={keywords}&hitsPerPage=20&facets=*"})
         byte_payload = bytes(json_string, 'utf-8')
-        algolia = {"x-algolia-agent": "Algolia%20for%20JavaScript%20(4.8.4)%3B%20Browser", "x-algolia-application-id": "XW7SBCT9V6", "x-algolia-api-key": "6b5e76b49705eb9f51a06d3c82f7acee"}
+        algolia = {"x-algolia-agent": "Algolia%20for%20JavaScript%20(4.8.6)%3B%20Browser", "x-algolia-application-id": "XW7SBCT9V6", "x-algolia-api-key": "ZWE0NmZiMGJiMzNiMTE3ZThhZDg4NzdkNDZlY2JmZWJiNGY1OTZlMjJlNGMwNzFiY2I0ZTY3Y2JkZmIyZWE5NXZhbGlkVW50aWw9MTYxODM2OTY2OQ=="}
         with requests.Session() as session:
             r = session.post("https://xw7sbct9v6-dsn.algolia.net/1/indexes/products/query", params=algolia, data=byte_payload, timeout=30)
             results = r.json()["hits"][0]
             apiurl = f"https://stockx.com/api/products/{results['url']}?includes=market,360&currency=USD"
             header = {
                 'accept': '*/*',
-                'accept-encoding': 'gzip, deflate, br',
-                'accept-language': 'en-US,en;q=0.9,ja-JP;q=0.8,ja;q=0.7,la;q=0.6',
-                'appos': 'web',
-                'appversion': '0.1',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
+                'accept-encoding': 'deflate, gzip',
+                'accept-language': 'en-US,en;q=0.9',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36'
             }
             response = requests.get(apiurl, verify=False, headers=header)
-
         prices = response.json()
         general = prices['Product']
         market = prices['Product']['market']
@@ -84,10 +74,10 @@ async def on_message(message):
             if len(bidasks) + len(f"Size {sizes[size]['shoeSize']} | Low Ask ${sizes[size]['market']['lowestAsk']} | High Bid ${sizes[size]['market']['highestBid']}\n") < 1024:
                 bidasks +=f"Size {sizes[size]['shoeSize']} | Low Ask ${sizes[size]['market']['lowestAsk']} | High Bid ${sizes[size]['market']['highestBid']}\n"
 
-        embed = discord.Embed(title=general['title'], url='https://stockx.com/' + general['urlKey'], color=embed_color, timestamp=datetime.utcnow())
+        embed = discord.Embed(title=general['title'], url='https://stockx.com/' + general['urlKey'], color=0x13e79e, timestamp=datetime.utcnow())
         embed.set_image(url=results['thumbnail_url'])
-        embed.set_thumbnail(url=thumbnail_icon_url)
-        embed.set_footer(icon_url=footer_icon_url, text=footer_text)
+        embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/493803021365411840/712503871120867358/Bloom.png")
+        embed.set_footer(icon_url="https://cdn.discordapp.com/attachments/493803021365411840/712503871120867358/Bloom.png", text='BloomCord | @ayyitsc9')
         if 'styleId' in general:
             embed.add_field(name='SKU', value=general['styleId'], inline=True)
         else:
@@ -121,14 +111,13 @@ async def on_message(message):
         embed.add_field(name='Sizes', value=bidasks, inline=False)
         await message.channel.send(embed=embed)
 
-    # Goat search Command
-    elif message.content.startswith(f"{command_prefix}goat"):
+    elif message.content.startswith(".goat"):
         args = message.content.split("goat ")[1]
         words = re.findall(r'\w+', args)
         keywords = ''
         for word in words:
             keywords += word + '%20'
-        json_string = json.dumps({"params": f"distinct=true&facetFilters=()&facets=%5B%22size%22%5D&hitsPerPage=10&numericFilters=%5B%5D&page=0&query={keywords}"})
+        json_string = json.dumps({"params": f"distinct=true&facetFilters=()&facets=%5B%22size%22%5D&hitsPerPage=20&numericFilters=%5B%5D&page=0&query={keywords}"})
         byte_payload = bytes(json_string, 'utf-8')
         x = {"x-algolia-agent": "Algolia for vanilla JavaScript 3.25.1", "x-algolia-application-id": "2FWOTDVM2O", "x-algolia-api-key": "ac96de6fef0e02bb95d433d8d5c7038a"}
         with requests.Session() as s:
@@ -159,10 +148,10 @@ async def on_message(message):
                     })
             for ask in availableSizesNewV2:
                 priceformat += f"Size {ask} | Ask: ${availableSizesNewV2[ask]}\n"
-            embed = discord.Embed(title=results['name'], url=f"https://goat.com/sneakers/{results['slug']}", color=embed_color, timestamp=datetime.utcnow())
+            embed = discord.Embed(title=results['name'], url=f"https://goat.com/sneakers/{results['slug']}", color=0x13e79e, timestamp=datetime.utcnow())
             embed.set_image(url=results['main_picture_url'])
-            embed.set_thumbnail(url=thumbnail_icon_url)
-            embed.set_footer(icon_url=footer_icon_url, text=footer_text)
+            embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/493803021365411840/712503871120867358/Bloom.png")
+            embed.set_footer(icon_url="https://cdn.discordapp.com/attachments/493803021365411840/712503871120867358/Bloom.png", text='BloomCord | @ayyitsc9')
             if results['sku']:
                 embed.add_field(name='SKU', value=f"{results['sku']}", inline=True)
             else:
@@ -182,8 +171,7 @@ async def on_message(message):
             embed.add_field(name='Prices', value=priceformat, inline=False)
             await message.channel.send(embed=embed)
 
-    # Compare command. Searches both StockX and Goat
-    elif message.content.startswith(f"{command_prefix}compare"):
+    elif message.content.startswith(".compare"):
         command_ran_by = message.author.id
         command_ran_in = message.channel.id
         def check(message):
@@ -196,13 +184,13 @@ async def on_message(message):
             keywords += word + '%20'
         try:
             embed = discord.Embed(title="What StockX level are you? 1 to 4", colour=0x13e79e, timestamp=datetime.utcnow())           
-            embed.set_footer(icon_url=footer_icon_url, text=footer_text)
+            embed.set_footer(icon_url="https://cdn.discordapp.com/attachments/493803021365411840/712503871120867358/Bloom.png", text='BloomCord | @ayyitsc9')
             await message.channel.send(embed=embed)
             stockx_level = await client.wait_for("message", check=check, timeout=30.0)
             stockx_level = str(stockx_level.content)
             if int(stockx_level)>4 or int(stockx_level)<1:
                 embed = discord.Embed(title="😰 Invalid input! Make sure to enter a number between 1 to 4.", colour=0x13e79e, timestamp=datetime.utcnow())           
-                embed.set_footer(icon_url=footer_icon_url, text=footer_text)
+                embed.set_footer(icon_url="https://cdn.discordapp.com/attachments/493803021365411840/712503871120867358/Bloom.png", text='BloomCord | @ayyitsc9')
                 await message.channel.send(embed=embed)
             else:
                 if int(stockx_level) == 1:
@@ -217,7 +205,7 @@ async def on_message(message):
                     pass
                 json_string = json.dumps({"params": f"query={keywords}&hitsPerPage=20&facets=*"})
                 byte_payload = bytes(json_string, 'utf-8')
-                algolia = {"x-algolia-agent": "Algolia for vanilla JavaScript 3.32.0", "x-algolia-application-id": "XW7SBCT9V6", "x-algolia-api-key": "6b5e76b49705eb9f51a06d3c82f7acee"}
+                algolia = {"x-algolia-agent": "Algolia%20for%20JavaScript%20(4.8.6)%3B%20Browser", "x-algolia-application-id": "XW7SBCT9V6", "x-algolia-api-key": "ZWE0NmZiMGJiMzNiMTE3ZThhZDg4NzdkNDZlY2JmZWJiNGY1OTZlMjJlNGMwNzFiY2I0ZTY3Y2JkZmIyZWE5NXZhbGlkVW50aWw9MTYxODM2OTY2OQ=="}
                 with requests.Session() as session:
                     r = session.post("https://xw7sbct9v6-dsn.algolia.net/1/indexes/products/query", params=algolia, data=byte_payload, timeout=30)
                 try:
@@ -225,16 +213,14 @@ async def on_message(message):
                     apiurl = f"https://stockx.com/api/products/{results['url']}?includes=market,360&currency=USD"
                     header = {
                         'accept': '*/*',
-                        'accept-encoding': 'gzip, deflate, br',
-                        'accept-language': 'en-US,en;q=0.9,ja-JP;q=0.8,ja;q=0.7,la;q=0.6',
-                        'appos': 'web',
-                        'appversion': '0.1',
-                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
+                        'accept-encoding': 'deflate, gzip',
+                        'accept-language': 'en-US,en;q=0.9',
+                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36'
                     }
                     response = requests.get(apiurl, verify=False, headers=header)
                 except IndexError:
                     embed = discord.Embed(title="😰 Could not find product on StockX", colour=0x13e79e, timestamp=datetime.utcnow())           
-                    embed.set_footer(icon_url=footer_icon_url, text=footer_text)
+                    embed.set_footer(icon_url="https://cdn.discordapp.com/attachments/493803021365411840/712503871120867358/Bloom.png", text='BloomCord | @ayyitsc9')
                     await message.channel.send(embed=embed)
                 prices = response.json()
                 general = prices['Product']
@@ -249,10 +235,10 @@ async def on_message(message):
                     stockx_object.update({
                         sizes[size]['shoeSize']: sizes[size]['market']['lowestAsk'] - (stockx_fee_rate * float(sizes[size]['market']['lowestAsk']))
                     })
-                embed = discord.Embed(title=general['title'], description="The payouts being compared are asks!", url='https://stockx.com/' + general['urlKey'], color=embed_color, timestamp=datetime.utcnow())
+                embed = discord.Embed(title=general['title'], description="The payouts being compared are asks!", url='https://stockx.com/' + general['urlKey'], color=0x13e79e, timestamp=datetime.utcnow())
                 embed.set_image(url=results['thumbnail_url'])
-                embed.set_thumbnail(url=thumbnail_icon_url)
-                embed.set_footer(icon_url=footer_icon_url, text=footer_text)
+                embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/493803021365411840/712503871120867358/Bloom.png")
+                embed.set_footer(icon_url="https://cdn.discordapp.com/attachments/493803021365411840/712503871120867358/Bloom.png", text='BloomCord | @ayyitsc9')
 
 
                 json_string = json.dumps({"params": f"distinct=true&facetFilters=()&facets=%5B%22size%22%5D&hitsPerPage=20&numericFilters=%5B%5D&page=0&query={keywords}"})
@@ -273,7 +259,7 @@ async def on_message(message):
                     cont = True
                 except IndexError:
                     embed = discord.Embed(title="😰 Could not find product on Goat", colour=0x13e79e, timestamp=datetime.utcnow())           
-                    embed.set_footer(icon_url=footer_icon_url, text=footer_text)
+                    embed.set_footer(icon_url="https://cdn.discordapp.com/attachments/493803021365411840/712503871120867358/Bloom.png", text='BloomCord | @ayyitsc9')
                     await message.channel.send(embed=embed)
                     cont = False
                 if cont:
@@ -324,6 +310,6 @@ async def on_message(message):
                     await message.channel.send(embed=embed)
         except asyncio.TimeoutError:
             embed = discord.Embed(title="😰 Timed out! Please make sure to reply within 30 seconds", colour=0x13e79e, timestamp=datetime.utcnow())           
-            embed.set_footer(icon_url=footer_icon_url, text=footer_text)
+            embed.set_footer(icon_url="https://cdn.discordapp.com/attachments/493803021365411840/712503871120867358/Bloom.png", text='BloomCord | @ayyitsc9')
             await message.channel.send(embed=embed)
 client.run(bot_token)
